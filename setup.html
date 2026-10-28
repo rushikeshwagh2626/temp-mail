@@ -1,0 +1,293 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Rushi Mail · GitHub Pages setup</title><style>*{box-sizing:border-box}body{margin:0;background:#f1f3ec;color:#1a2c20;font:16px/1.7 system-ui,sans-serif}main{max-width:900px;margin:auto;padding:36px 20px}header{background:#19291e;color:#f1f5eb;padding:32px;border-radius:22px}h1{font-size:clamp(30px,5vw,44px);line-height:1.16;letter-spacing:-1.5px;margin:16px 0}small{letter-spacing:2px;color:#c5ef8b}h2{font-size:23px;letter-spacing:-.6px;margin:0 0 14px}section,details{background:#fff;border:1px solid #d5dfcd;border-radius:18px;margin-top:22px;padding:26px}li{padding-bottom:10px}ol{padding-left:23px}code{background:#e8efdf;border-radius:5px;padding:3px 5px;overflow-wrap:anywhere}a{color:#2e632c}button,.button{display:inline-block;background:#c5ef8b;color:#172b16;border:0;border-radius:10px;padding:13px 18px;font:600 14px system-ui;text-decoration:none;cursor:pointer}header .button{margin-top:12px}.note{background:#edf4e3;border-radius:10px;padding:14px 17px;font-size:14px}.settings{display:grid;grid-template-columns:1fr 1.1fr;gap:10px;font-size:14px}.settings div{padding:10px 0;border-bottom:1px solid #dce4d7}textarea{width:100%;height:250px;font:12px/1.5 monospace;margin-top:14px}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.8 ui-monospace,monospace}summary{font-weight:650;cursor:pointer}footer{font-size:12px;color:#5b6d58;margin:25px 0}button:focus-visible,a:focus-visible{outline:3px solid #477330;outline-offset:4px}@media(max-width:500px){header,section,details{padding:22px}.settings{grid-template-columns:1fr}.settings div{padding:4px 0}}</style></head><body><main><header><small>CODEBYRUSHI / COMPLETE SETUP</small><h1>Your website on GitHub.<br>Your inbox connected.</h1><p>The complete website is included. GitHub Pages hosts the page; a free Cloudflare Worker connects the email service.</p><a class="button" href="./index.html">Open Rushi Mail ↗</a><p style="font-size:13px;opacity:.85">Complete all three steps below before creating your first inbox. Use the deployed GitHub Pages link for live email.</p></header>
+<section><h2>1. Upload the website to GitHub Pages</h2><ol><li>Extract the ZIP. Create a <strong>new public GitHub repository</strong> named <code>rushi-temp-mail</code> under <code>unsungstories-2626</code>.</li><li>Choose <strong>Add file → Upload files</strong>. Upload all extracted contents, including <code>backend</code>. Commit to <strong>main</strong>.</li><li>Check that <code>index.html</code>, <code>styles.css</code>, <code>app.js</code> and <code>setup.html</code> are directly at the repository root.</li><li>Open <strong>Settings → Pages</strong>. Choose <strong>Deploy from a branch → main → / (root) → Save</strong>.</li><li>When deployment finishes, use <strong>Visit site</strong>. GitHub may take up to 10 minutes.</li></ol><p class="note">Upload the ZIP’s contents, not the ZIP file or an extra enclosing folder. Keep your existing website in its original repository.</p></section>
+<section><h2>2. Create the free email connection</h2><ol><li>Sign in to <a href="https://dash.cloudflare.com/" target="_blank" rel="noopener noreferrer">Cloudflare</a>. Choose <strong>Workers Free</strong>; no domain purchase is needed.</li><li>Open <strong>Workers &amp; Pages → Create application</strong>. Import the GitHub repository you just created.</li><li>Use these settings:</li></ol><div class="settings"><div>Worker name</div><div><code>rushi-mail-email-service</code></div><div>Root directory</div><div><code>backend</code></div><div>Build command</div><div>Leave empty</div><div>Deploy command</div><div><code>npx wrangler deploy</code></div></div><p>Click <strong>Deploy</strong>. Open the supplied <strong>workers.dev</strong> link. It should say “Your email connection is ready.” Click <strong>Copy Worker address</strong>.</p><p class="note">Your GitHub origin is already configured as <code>https://unsungstories-2626.github.io</code>. For another username or custom domain, see the full instructions below.</p></section>
+<section><h2>3. Connect it on your website</h2><ol><li>Open your <strong>deployed GitHub Pages website</strong>.</li><li>Click <strong>Connect email service</strong> or <strong>Email setup</strong>.</li><li>Paste your own <strong>workers.dev</strong> address and click <strong>Save connection</strong>.</li><li>Click <strong>Create my inbox</strong>. Copy the email address once it says <strong>Inbox ready</strong>.</li></ol><p>To test delivery, send a normal email from your own Gmail to the new address with the message <code>Your verification code is 482913.</code> Return to Rushi Mail, refresh, and open it.</p></section>
+<section><h2>More domains, still free</h2><p>Click <strong>More domains</strong>. Generate your own free token at <a href="https://dropmail.me/api/#get-token" target="_blank" rel="noopener noreferrer">DropMail</a>, copy it, and paste it into the website. Choose a domain and create an address.</p><p>19 DropMail domains were available when checked; the list can change. Keep the token private. DropMail chooses the email name and may expire an inbox after 10 minutes without activity. Keep your tab visible while waiting. Some websites reject temporary emails.</p></section>
+<section><h2>Optional: copy and paste the Worker</h2><p>If Cloudflare offers a blank Worker or <strong>Start with Hello World</strong>, create it, open <strong>Edit code</strong>, replace the entire starter code with the code below and click <strong>Deploy</strong>. If this option is absent, use the GitHub import steps above.</p><button id="copy-code">Copy complete Worker code</button><p id="copy-status" role="status">No private keys or tokens are included in this code.</p><details id="code-details"><summary>Show code for manual copying</summary><textarea id="worker-source" readonly spellcheck="false">// Rushi Mail: Mail.tm plus optional user-owned free DropMail access.
+// Only the specific inbox actions below are exposed. There is no generic API proxy.
+const UPSTREAM = &#x27;https://api.mail.tm&#x27;;
+const HEADERS = {&#x27;Content-Type&#x27;:&#x27;application/json; charset=utf-8&#x27;,&#x27;Cache-Control&#x27;:&#x27;no-store&#x27;,&#x27;X-Content-Type-Options&#x27;:&#x27;nosniff&#x27;,&#x27;Referrer-Policy&#x27;:&#x27;no-referrer&#x27;};
+const list = d =&gt; d[&#x27;hydra:member&#x27;] || d.member || [];
+const json = (data, status=200, extra={}) =&gt; new Response(JSON.stringify(data), {status,headers:{...HEADERS,...extra}});
+const failure = (message,status=400) =&gt; Object.assign(new Error(message),{status});
+let availableCache = null, availableAt = 0;
+async function service(path, {token=&#x27;&#x27;,method=&#x27;GET&#x27;,body}={}) {
+ const headers={Accept:&#x27;application/ld+json&#x27;};
+ if(token)headers.Authorization=&#x27;Bearer &#x27;+token;
+ if(body!==undefined)headers[&#x27;Content-Type&#x27;]=method===&#x27;PATCH&#x27;?&#x27;application/merge-patch+json&#x27;:&#x27;application/json&#x27;;
+ let response;
+ try{response=await fetch(UPSTREAM+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(15000)});}catch{throw failure(&#x27;The email service is not responding. Please try again later.&#x27;,503);}
+ if(response.status===204)return null;
+ const data=await response.json().catch(()=&gt;({}));
+ if(!response.ok){let message=&#x27;The email service returned an error. Please try again.&#x27;;
+ if(response.status===401)message=&#x27;This inbox could not reconnect. It may have expired. Try Refresh or create a new address.&#x27;;
+ if(response.status===422)message=&#x27;That email name is unavailable or invalid. Try a different name or leave it blank.&#x27;;
+ if(response.status===429)message=&#x27;The email service is busy. Wait one minute before trying again.&#x27;;
+ if(response.status===404||response.status===410)message=&#x27;This inbox or message is no longer available.&#x27;;
+ throw failure(message,response.status&gt;=500?503:response.status);}
+ return data;
+}
+async function available(){
+ if(availableCache&amp;&amp;Date.now()-availableAt&lt;300000)return availableCache;
+ const found=[];
+ for(let page=1;page&lt;=20;page++){
+  const d=await service(&#x27;/domains?page=&#x27;+page);
+  found.push(...list(d).filter(x=&gt;x.isActive!==false&amp;&amp;!x.isPrivate).map(x=&gt;({domain:x.domain})));
+  if(!d[&#x27;hydra:view&#x27;]?.[&#x27;hydra:next&#x27;])break;
+ }
+ if(!found.length)throw failure(&#x27;No email domains are available right now.&#x27;,503);
+ availableCache=[...new Map(found.map(d=&gt;[d.domain,d])).values()];availableAt=Date.now();return availableCache;
+}
+async function dropService(token,query,variables={}){
+ if(!/^af_[A-Za-z0-9._~-]+$/.test(token)||token.length&gt;6000)throw failure(&#x27;Connect your free DropMail token using More domains.&#x27;,401);
+ let response;
+ try{response=await fetch(&#x27;https://dropmail.me/api/graphql/-&#x27;,{method:&#x27;POST&#x27;,headers:{&#x27;Content-Type&#x27;:&#x27;application/json&#x27;,Accept:&#x27;application/json&#x27;,Authorization:&#x27;Bearer &#x27;+token},body:JSON.stringify({query,variables}),signal:AbortSignal.timeout(15000)});}catch{throw failure(&#x27;DropMail is not responding. Please try again later.&#x27;,503);}
+ const result=await response.json().catch(()=&gt;({}));
+ if(response.status===401||response.status===403)throw failure(&#x27;Your DropMail token is invalid or expired. Open More domains to connect a valid token.&#x27;,401);
+ const code=result.errors?.[0]?.extensions?.code;
+ if(response.status===429||code===&#x27;RATE_LIMIT_EXCEEDED&#x27;)throw failure(&#x27;DropMail is limiting requests. Wait one minute before trying again.&#x27;,429);
+ if(code===&#x27;SESSION_NOT_FOUND&#x27;)throw failure(&#x27;This DropMail inbox expired. Its old emails cannot be recovered. Create a new address.&#x27;,410);
+ if(code===&#x27;DOMAIN_NOT_FOUND&#x27;)throw failure(&#x27;That domain is no longer available. Reload the domain list.&#x27;,400);
+ if(!response.ok||result.errors?.length||!result.data)throw failure(&#x27;DropMail could not complete this action. Please try again.&#x27;,503);
+ return result.data;
+}
+function dropId(value){if(typeof value!==&#x27;string&#x27;||!/^[A-Za-z0-9_+/=-]{1,512}$/.test(value))throw failure(&#x27;Invalid inbox or message identifier.&#x27;);return value;}
+const DROP_FIELDS=&#x27;id fromAddr headerSubject text receivedAt&#x27;;
+function normalDrop(m){return {id:m.id,from:{name:&#x27;&#x27;,address:m.fromAddr||&#x27;&#x27;},subject:m.headerSubject||&#x27;&#x27;,intro:(m.text||&#x27;&#x27;).slice(0,180),text:m.text||&#x27;&#x27;,html:[],seen:false,isDeleted:false,createdAt:m.receivedAt};}
+async function dropAction(path,b,token){
+ if(path===&#x27;/app/drop-options&#x27;){
+  const d=await dropService(token,&#x27;query {domains {id name expiresAt availableVia health}}&#x27;);
+  return json({domains:d.domains.filter(x=&gt;x.availableVia?.includes(&#x27;API&#x27;)&amp;&amp;x.health!==&#x27;BROKEN&#x27;&amp;&amp;(!x.expiresAt||Date.parse(x.expiresAt)&gt;Date.now())).map(x=&gt;({domain:x.name,id:x.id,provider:&#x27;dropmail&#x27;,expiresAt:x.expiresAt}))});
+ }
+ if(path===&#x27;/app/drop-create&#x27;){
+  const d=await dropService(token,&#x27;mutation ($domain: ID!) {introduceSession(input:{domainId:$domain}) {id expiresAt addresses {id address}}}&#x27;,{domain:dropId(b.domainId)});
+  const s=d.introduceSession,a=s?.addresses?.[0];if(!a)throw failure(&#x27;DropMail did not create an inbox. Try again.&#x27;,503);
+  return json({inbox:{id:a.id,address:a.address,sessionId:s.id,provider:&#x27;dropmail&#x27;,expiresAt:s.expiresAt}},201);
+ }
+ if(path===&#x27;/app/drop-check&#x27;){
+  const after=b.cursor==null?null:dropId(b.cursor);
+  const d=await dropService(token,&#x27;query ($id: ID!, $after: String) {session(id:$id) {expiresAt mailsConnection(first:30,after:$after,sort:DESC) {totalCount pageInfo {hasNextPage endCursor} edges {node {&#x27;+DROP_FIELDS+&#x27;}}}}}&#x27;,{id:dropId(b.sessionId),after});
+  if(!d.session)throw failure(&#x27;This DropMail inbox expired. Create a new address.&#x27;,410);
+  const c=d.session.mailsConnection;
+  return json({messages:c.edges.map(e=&gt;normalDrop(e.node)),total:c.totalCount,hasNext:c.pageInfo.hasNextPage,nextCursor:c.pageInfo.endCursor,expiresAt:d.session.expiresAt});
+ }
+ if(path===&#x27;/app/drop-read&#x27;){
+  const d=await dropService(token,&#x27;query ($id: ID!) {node(id:$id) {... on Mail {&#x27;+DROP_FIELDS+&#x27; attachments {name}}}}&#x27;,{id:dropId(b.id)});
+  if(!d.node)throw failure(&#x27;This message is no longer available.&#x27;,404);
+  return json({message:{...normalDrop(d.node),seen:true,hasAttachments:!!d.node.attachments?.length}});
+ }
+ throw failure(&#x27;Unknown application action.&#x27;,404);
+}
+function normalMessage(m){return {id:m.id,from:{name:m.from?.name||&#x27;&#x27;,address:m.from?.address||&#x27;&#x27;},subject:m.subject||&#x27;&#x27;,intro:m.intro||&#x27;&#x27;,seen:!!m.seen,isDeleted:!!m.isDeleted,createdAt:m.createdAt,hasAttachments:!!m.hasAttachments};}
+function tokenFrom(request){const header=request.headers.get(&#x27;Authorization&#x27;)||&#x27;&#x27;;if(!/^Bearer [A-Za-z0-9._~-]+$/.test(header)||header.length&gt;6000)throw failure(&#x27;Please reconnect to your inbox.&#x27;,401);return header.slice(7);}
+function idFrom(body){if(typeof body.id!==&#x27;string&#x27;||! /^[A-Za-z0-9_-]{1,150}$/.test(body.id))throw failure(&#x27;Invalid message identifier.&#x27;);return body.id;}
+async function appAction(request,url){
+ if(request.method!==&#x27;POST&#x27;)return json({message:&#x27;Use this application from its website.&#x27;},405);
+ // Origin is checked by the exported Worker handler before routing.
+ if(!(request.headers.get(&#x27;Content-Type&#x27;)||&#x27;&#x27;).startsWith(&#x27;application/json&#x27;))return json({message:&#x27;Invalid request format.&#x27;},415);
+ if(Number(request.headers.get(&#x27;Content-Length&#x27;)||0)&gt;8192)return json({message:&#x27;Request too large.&#x27;},413);
+ const text=await request.text();if(text.length&gt;8192)return json({message:&#x27;Request too large.&#x27;},413);
+ let b;try{b=JSON.parse(text||&#x27;{}&#x27;);}catch{return json({message:&#x27;Invalid request.&#x27;},400);}
+ if(!b||Array.isArray(b)||typeof b!==&#x27;object&#x27;)return json({message:&#x27;Invalid request.&#x27;},400);
+ try{
+  if(url.pathname===&#x27;/app/health&#x27;)return json({service:&#x27;rushi-mail-github-api&#x27;,version:1});
+  if([&#x27;/app/drop-options&#x27;,&#x27;/app/drop-create&#x27;,&#x27;/app/drop-check&#x27;,&#x27;/app/drop-read&#x27;].includes(url.pathname))return await dropAction(url.pathname,b,tokenFrom(request));
+  if(url.pathname===&#x27;/app/options&#x27;)return json({domains:await available()});
+  if(url.pathname===&#x27;/app/create&#x27;){
+   const domains=await available();const domain=b.domain||domains[0].domain;
+   if(!domains.some(d=&gt;d.domain===domain))throw failure(&#x27;Please choose an available email domain.&#x27;);
+   if(typeof b.name!==&#x27;string&#x27;||! /^[a-z0-9][a-z0-9._-]{1,46}[a-z0-9]$/.test(b.name))throw failure(&#x27;Choose a valid email name with 3–48 characters.&#x27;);
+   if(typeof b.password!==&#x27;string&#x27;||b.password.length&lt;24||b.password.length&gt;100)throw failure(&#x27;Could not prepare inbox credentials. Reload and try again.&#x27;);
+   const account=await service(&#x27;/accounts&#x27;,{method:&#x27;POST&#x27;,body:{address:b.name+&#x27;@&#x27;+domain,password:b.password}});
+   return json({inbox:{id:account.id,address:account.address}},201);
+  }
+  if(url.pathname===&#x27;/app/connect&#x27;){
+   if(typeof b.address!==&#x27;string&#x27;||b.address.length&gt;254||!b.address.includes(&#x27;@&#x27;)||typeof b.password!==&#x27;string&#x27;||b.password.length&gt;100)throw failure(&#x27;Invalid saved inbox.&#x27;);
+   const session=await service(&#x27;/token&#x27;,{method:&#x27;POST&#x27;,body:{address:b.address,password:b.password}});
+   return json({token:session.token});
+  }
+  const token=tokenFrom(request);
+  if(url.pathname===&#x27;/app/check&#x27;){
+   const page=Number(b.page||1);if(!Number.isSafeInteger(page)||page&lt;1||page&gt;1000)throw failure(&#x27;Invalid inbox page.&#x27;);
+   const d=await service(&#x27;/messages?page=&#x27;+page,{token});const messages=list(d).filter(m=&gt;!m.isDeleted).map(normalMessage);
+   const total=d[&#x27;hydra:totalItems&#x27;]??d.totalItems??messages.length;
+   return json({messages,total,hasNext:!!d[&#x27;hydra:view&#x27;]?.[&#x27;hydra:next&#x27;]||page*30&lt;total});
+  }
+  if(url.pathname===&#x27;/app/read&#x27;){
+   const id=idFrom(b);const m=await service(&#x27;/messages/&#x27;+id,{token});
+   await service(&#x27;/messages/&#x27;+id,{token,method:&#x27;PATCH&#x27;,body:{seen:true}}).catch(()=&gt;{});
+   return json({message:{...normalMessage(m),text:m.text||&#x27;&#x27;,html:Array.isArray(m.html)?m.html:[],seen:true}});
+  }
+  if(url.pathname===&#x27;/app/remove-message&#x27;){await service(&#x27;/messages/&#x27;+idFrom(b),{token,method:&#x27;DELETE&#x27;});return json({deleted:true});}
+  if(url.pathname===&#x27;/app/remove-inbox&#x27;){
+   const me=await service(&#x27;/me&#x27;,{token});await service(&#x27;/accounts/&#x27;+encodeURIComponent(me.id),{token,method:&#x27;DELETE&#x27;});return json({deleted:true});
+  }
+  return json({message:&#x27;Unknown application action.&#x27;},404);
+ }catch(e){return json({message:e.message||&#x27;Unable to complete this action.&#x27;},e.status||500,e.status===429?{&#x27;Retry-After&#x27;:&#x27;60&#x27;}:{});}
+}
+
+const READY_HTML = &quot;&lt;!doctype html&gt;&lt;html lang=\&quot;en\&quot;&gt;&lt;meta charset=\&quot;utf-8\&quot;&gt;&lt;meta name=\&quot;viewport\&quot; content=\&quot;width=device-width,initial-scale=1\&quot;&gt;&lt;title&gt;Rushi Mail connection ready&lt;/title&gt;&lt;style&gt;body{background:#101713;color:#f1f5ee;font:17px/1.7 system-ui;max-width:650px;padding:60px 24px;margin:auto}h1{color:#c5ef8b}code{word-break:break-all}button{padding:12px 18px;background:#c5ef8b;border:0;border-radius:10px}&lt;/style&gt;&lt;h1&gt;Your email connection is ready.&lt;/h1&gt;&lt;p&gt;Copy this page\u2019s address, return to your GitHub Pages website, choose &lt;strong&gt;Email setup&lt;/strong&gt;, and paste it there.&lt;/p&gt;&lt;p&gt;&lt;code id=\&quot;address\&quot;&gt;&lt;/code&gt;&lt;/p&gt;&lt;button id=\&quot;copy\&quot;&gt;Copy Worker address&lt;/button&gt;&lt;p id=\&quot;status\&quot;&gt;&lt;/p&gt;&lt;script&gt;document.getElementById(&#x27;address&#x27;).textContent=location.origin;document.getElementById(&#x27;copy&#x27;).onclick=async()=&gt;{try{await navigator.clipboard.writeText(location.origin);document.getElementById(&#x27;status&#x27;).textContent=&#x27;Copied. Paste it into Email setup on your website.&#x27;;}catch{document.getElementById(&#x27;status&#x27;).textContent=&#x27;Select and copy the address above.&#x27;;}};&lt;/script&gt;&lt;/html&gt;&quot;;
+// This is the GitHub account supplied for this project. No private keys belong here.
+const DEFAULT_ALLOWED_ORIGIN = &#x27;https://unsungstories-2626.github.io&#x27;;
+export default {
+ async fetch(request,env={}) {
+  const url=new URL(request.url),origin=request.headers.get(&#x27;Origin&#x27;);
+  const allowed=String(env.ALLOWED_ORIGIN||DEFAULT_ALLOWED_ORIGIN).replace(/\/$/,&#x27;&#x27;);
+  if(!origin&amp;&amp;url.pathname===&#x27;/&#x27;&amp;&amp;[&#x27;GET&#x27;,&#x27;HEAD&#x27;].includes(request.method))return new Response(request.method===&#x27;HEAD&#x27;?null:READY_HTML,{headers:{&#x27;Content-Type&#x27;:&#x27;text/html; charset=utf-8&#x27;,&#x27;Cache-Control&#x27;:&#x27;no-store&#x27;,&#x27;Referrer-Policy&#x27;:&#x27;no-referrer&#x27;,&#x27;X-Content-Type-Options&#x27;:&#x27;nosniff&#x27;}});
+  if(origin!==allowed&amp;&amp;origin!==url.origin)return json({message:&#x27;This website is not allowed to use this Worker. Check ALLOWED_ORIGIN in the setup guide.&#x27;},403);
+  const cors={&#x27;Access-Control-Allow-Origin&#x27;:origin,&#x27;Vary&#x27;:&#x27;Origin&#x27;,&#x27;Access-Control-Allow-Methods&#x27;:&#x27;POST, OPTIONS&#x27;,&#x27;Access-Control-Allow-Headers&#x27;:&#x27;Authorization, Content-Type&#x27;,&#x27;Access-Control-Expose-Headers&#x27;:&#x27;Retry-After&#x27;,&#x27;Access-Control-Max-Age&#x27;:&#x27;600&#x27;};
+  if(request.method===&#x27;OPTIONS&#x27;)return new Response(null,{status:204,headers:cors});
+  const response=url.pathname.startsWith(&#x27;/app/&#x27;)?await appAction(request,url):json({message:&#x27;Not found.&#x27;},404);
+  const headers=new Headers(response.headers);for(const [key,value] of Object.entries(cors))headers.set(key,value);
+  return new Response(response.body,{status:response.status,headers});
+ }
+};
+</textarea></details></section>
+<details><summary>Full instructions, privacy, costs and troubleshooting</summary><pre>RUSHI MAIL — COMPLETE GITHUB PAGES EDITION
+Prepared for CodeByRushi — 28 October 2026
+
+START HERE
+Your visible website runs on GitHub Pages. Receiving email also needs the
+included Cloudflare Worker. Both can use free plans, within their limits.
+GitHub Pages alone cannot run this email server. Uploading only the website
+without setting up the Worker will show the setup screen, not a working inbox.
+No coding, paid domain, database or terminal is required.
+
+A. PUT THE WEBSITE ON GITHUB PAGES
+1. Extract the ZIP on your computer. Do not upload the ZIP itself.
+2. Sign in to GitHub as unsungstories-2626. Create a NEW public repository
+   named rushi-temp-mail and add a README. Leave your existing website alone.
+3. In that repository, choose Add file &gt; Upload files.
+   Upload ALL the extracted contents, including the backend folder.
+   index.html, styles.css, app.js and setup.html must appear directly at the
+   repository&#x27;s top level, not inside an extra enclosing folder.
+4. Commit the upload to the main branch.
+5. Open Settings &gt; Pages. Source = Deploy from a branch.
+   Branch = main. Folder = / (root). Click Save.
+6. Wait for GitHub&#x27;s deployment to finish (it can take up to 10 minutes).
+   Open the Visit site link in Settings &gt; Pages. Bookmark that exact URL.
+
+B. SET UP THE FREE EMAIL WORKER
+1. Sign in or create a free account at https://dash.cloudflare.com/.
+   Stay on Workers Free. You do not need to buy or add a domain.
+2. Open Workers &amp; Pages &gt; Create application. Choose to import a GitHub
+   repository. Connect GitHub and select the rushi-temp-mail repository.
+3. Set the project/Worker name to rushi-mail-email-service.
+4. In the build settings, set:
+   Root directory: backend
+   Build command: leave empty
+   Deploy command: npx wrangler deploy
+   No API keys, database bindings or environment variables are needed for
+   your existing GitHub username.
+5. Click Deploy. Choose a free workers.dev subdomain if Cloudflare asks.
+6. Open the deployed workers.dev URL. It should say:
+   &quot;Your email connection is ready.&quot;
+   Click Copy Worker address. Keep that address for step C.
+
+OPTIONAL COPY-PASTE METHOD
+If Cloudflare offers Start with Hello World or a blank Create Worker option,
+you can use it instead of importing GitHub. Create the Worker, open Edit code,
+replace ALL the starter code with backend/worker.js, then Deploy.
+Open setup.html and use Copy complete Worker code for easy copying.
+If that blank-Worker option is not shown, follow the GitHub import method above.
+
+C. CONNECT THE TWO PARTS
+1. Open YOUR DEPLOYED GITHUB PAGES WEBSITE, not the local index.html file.
+2. Click Connect email service (or Email setup).
+3. Paste your own HTTPS workers.dev address, then click Save connection.
+   The app checks that it is running this package&#x27;s Worker.
+4. Click Create my inbox. When it says Inbox ready, copy the email address.
+   It will use a provider email domain, not your GitHub website domain.
+
+D. ADD MORE FREE EMAIL DOMAINS (OPTIONAL)
+Mail.tm works without an API key. To also use DropMail domains:
+1. On your website click More domains.
+2. Open https://dropmail.me/api/#get-token. Choose a duration and Generate token.
+   Complete any requested verification. No payment or account signup is needed.
+3. Copy the token starting with af_. Return to your website, paste it and
+   click Connect free domains. Never put that token into GitHub or source code.
+4. Select a domain, then Create address. Use Change address for another one.
+19 DropMail domains were returned by the provider during this work; the number
+can change. DropMail generates the part before @. Its inboxes may expire after
+10 minutes without activity, and expired messages are lost. Keep the tab
+visible while waiting. Renew the token on DropMail when needed, then paste the
+renewed token under More domains. Saving locally does not keep an inbox alive.
+
+E. CHECK EMAIL DELIVERY
+From your own Gmail or normal email account, send this to the new temp address:
+Subject: My inbox test
+Message: Your verification code is 482913.
+Return to Rushi Mail, click Refresh, open the message and copy the code.
+The app checks every 10 seconds while the tab is visible.
+No outgoing email or SMS functionality is included.
+
+IF YOU USE ANOTHER GITHUB USERNAME OR A CUSTOM DOMAIN
+The Worker is already set to allow https://unsungstories-2626.github.io.
+For another account, open the Worker in Cloudflare &gt; Settings &gt; Variables
+and Secrets &gt; add a text variable (or the equivalent Variables section).
+Name: ALLOWED_ORIGIN
+Value: your website origin only, for example https://yourname.github.io
+Do not include the repository path. Save/deploy the change.
+For a custom website domain use its exact HTTPS origin instead.
+The app currently accepts a workers.dev address for the email server.
+Your visitors also enter that address in Email setup on their own browser.
+The address is not a secret; do not publish anyone&#x27;s inbox password or token.
+
+FILES INCLUDED
+index.html          Website page
+styles.css          Responsive theme
+app.js              Inbox, domain selection, setup, message reading, OTP copying
+setup.html          Click-by-click guide with Copy complete Worker code button
+START-HERE.txt      These instructions
+README.md           Short repository guide
+backend/worker.js   Email server to deploy on Cloudflare Workers
+backend/wrangler.jsonc  Worker deployment settings
+backend/package.json   Module/deployment configuration
+
+WHAT IS FREE / IMPORTANT LIMITS
+- GitHub Pages: use a public repository on the free plan.
+- Cloudflare Workers Free has request/CPU limits (currently 100,000 requests/day).
+- The email providers have their own availability and rate limits.
+- Temporary addresses are not accepted by every website. FineShare may reject
+  them. Different domains do not guarantee OTP acceptance.
+- Up to 10 saved inboxes in each browser. Delete/forget old ones to create more.
+- Mail.tm Delete inbox removes the provider inbox. DropMail Forget inbox only
+  removes your saved details; mail remains until DropMail&#x27;s session expires.
+- Individual message deletion is unavailable for DropMail.
+- Inbox credentials, optional DropMail token and your Worker address are kept
+  in browser storage on this origin. Other sites on the same GitHub origin
+  share that browser-storage security boundary. Use only repositories you trust.
+- A different device/browser/website URL will not inherit saved inbox details.
+- Clearing browser data can lose your saved inboxes and setup.
+- Your Worker passes credentials/messages to the provider but this code does
+  not save them in a server database. The provider stores incoming emails.
+- Do not use temporary addresses for important accounts or permanent recovery.
+- Keep the visible provider attribution. No payment is built into this app.
+
+TROUBLESHOOTING
+Website 404: ensure index.html is at the main branch root; check Settings &gt; Pages.
+No styling: upload styles.css and app.js beside index.html, using exact filenames.
+Cloudflare build failure: root directory must be backend; deploy command must
+be npx wrangler deploy. Choose Workers, not a Pages static-only project.
+Save connection fails: deploy the included NEW backend/worker.js, not the old
+all-in-one Worker. Use its workers.dev address and check ALLOWED_ORIGIN above.
+Do not open index.html from your computer for live email; use the GitHub URL.
+Temporary provider errors: wait and retry. Do not click Refresh repeatedly.
+No OTP: run the normal-email test in section E; the sender may reject temp mail.
+DropMail expired: create a new inbox. Expired messages cannot be recovered.
+
+VALIDATION
+Checked frontend/Worker syntax, existing inbox operations and DropMail flows,
+GitHub cross-origin preflight/headers, allowed-origin rejection, Worker-address
+validation and relative asset paths. The first-time setup screen and invalid
+address feedback were checked in a browser preview. Live provider domain
+access was checked. No new GitHub/Cloudflare deployment in your accounts was
+performed, and actual incoming OTP delivery has not been tested.
+
+OFFICIAL REFERENCES
+https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site
+https://developers.cloudflare.com/workers/get-started/dashboard/
+https://developers.cloudflare.com/workers/platform/pricing/
+https://docs.mail.tm/
+https://dropmail.me/api/
+</pre></details><footer>Prepared 28 October 2026 · Frontend setup and API logic checked. Your accounts still need deployment; actual OTP delivery has not been tested.</footer></main><script>document.getElementById('copy-code').onclick=async()=>{const input=document.getElementById('worker-source'),status=document.getElementById('copy-status');try{await navigator.clipboard.writeText(input.value);status.textContent='Copied. Paste into Cloudflare’s Worker editor, replacing all starter code.';}catch{document.getElementById('code-details').open=true;input.focus();input.select();const ok=document.execCommand('copy');status.textContent=ok?'Copied. Paste into the Worker editor and Deploy.':'The code is selected. Press Ctrl+C (or Copy on mobile).';}};</script></body></html>

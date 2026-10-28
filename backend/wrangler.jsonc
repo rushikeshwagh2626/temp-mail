@@ -1,0 +1,6 @@
+{
+  "name": "rushi-mail-email-service",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-28",
+  "workers_dev": true
+}

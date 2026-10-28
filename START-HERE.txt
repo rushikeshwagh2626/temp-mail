@@ -1,0 +1,147 @@
+RUSHI MAIL — COMPLETE GITHUB PAGES EDITION
+Prepared for CodeByRushi — 28 October 2026
+
+START HERE
+Your visible website runs on GitHub Pages. Receiving email also needs the
+included Cloudflare Worker. Both can use free plans, within their limits.
+GitHub Pages alone cannot run this email server. Uploading only the website
+without setting up the Worker will show the setup screen, not a working inbox.
+No coding, paid domain, database or terminal is required.
+
+A. PUT THE WEBSITE ON GITHUB PAGES
+1. Extract the ZIP on your computer. Do not upload the ZIP itself.
+2. Sign in to GitHub as unsungstories-2626. Create a NEW public repository
+   named rushi-temp-mail and add a README. Leave your existing website alone.
+3. In that repository, choose Add file > Upload files.
+   Upload ALL the extracted contents, including the backend folder.
+   index.html, styles.css, app.js and setup.html must appear directly at the
+   repository's top level, not inside an extra enclosing folder.
+4. Commit the upload to the main branch.
+5. Open Settings > Pages. Source = Deploy from a branch.
+   Branch = main. Folder = / (root). Click Save.
+6. Wait for GitHub's deployment to finish (it can take up to 10 minutes).
+   Open the Visit site link in Settings > Pages. Bookmark that exact URL.
+
+B. SET UP THE FREE EMAIL WORKER
+1. Sign in or create a free account at https://dash.cloudflare.com/.
+   Stay on Workers Free. You do not need to buy or add a domain.
+2. Open Workers & Pages > Create application. Choose to import a GitHub
+   repository. Connect GitHub and select the rushi-temp-mail repository.
+3. Set the project/Worker name to rushi-mail-email-service.
+4. In the build settings, set:
+   Root directory: backend
+   Build command: leave empty
+   Deploy command: npx wrangler deploy
+   No API keys, database bindings or environment variables are needed for
+   your existing GitHub username.
+5. Click Deploy. Choose a free workers.dev subdomain if Cloudflare asks.
+6. Open the deployed workers.dev URL. It should say:
+   "Your email connection is ready."
+   Click Copy Worker address. Keep that address for step C.
+
+OPTIONAL COPY-PASTE METHOD
+If Cloudflare offers Start with Hello World or a blank Create Worker option,
+you can use it instead of importing GitHub. Create the Worker, open Edit code,
+replace ALL the starter code with backend/worker.js, then Deploy.
+Open setup.html and use Copy complete Worker code for easy copying.
+If that blank-Worker option is not shown, follow the GitHub import method above.
+
+C. CONNECT THE TWO PARTS
+1. Open YOUR DEPLOYED GITHUB PAGES WEBSITE, not the local index.html file.
+2. Click Connect email service (or Email setup).
+3. Paste your own HTTPS workers.dev address, then click Save connection.
+   The app checks that it is running this package's Worker.
+4. Click Create my inbox. When it says Inbox ready, copy the email address.
+   It will use a provider email domain, not your GitHub website domain.
+
+D. ADD MORE FREE EMAIL DOMAINS (OPTIONAL)
+Mail.tm works without an API key. To also use DropMail domains:
+1. On your website click More domains.
+2. Open https://dropmail.me/api/#get-token. Choose a duration and Generate token.
+   Complete any requested verification. No payment or account signup is needed.
+3. Copy the token starting with af_. Return to your website, paste it and
+   click Connect free domains. Never put that token into GitHub or source code.
+4. Select a domain, then Create address. Use Change address for another one.
+19 DropMail domains were returned by the provider during this work; the number
+can change. DropMail generates the part before @. Its inboxes may expire after
+10 minutes without activity, and expired messages are lost. Keep the tab
+visible while waiting. Renew the token on DropMail when needed, then paste the
+renewed token under More domains. Saving locally does not keep an inbox alive.
+
+E. CHECK EMAIL DELIVERY
+From your own Gmail or normal email account, send this to the new temp address:
+Subject: My inbox test
+Message: Your verification code is 482913.
+Return to Rushi Mail, click Refresh, open the message and copy the code.
+The app checks every 10 seconds while the tab is visible.
+No outgoing email or SMS functionality is included.
+
+IF YOU USE ANOTHER GITHUB USERNAME OR A CUSTOM DOMAIN
+The Worker is already set to allow https://unsungstories-2626.github.io.
+For another account, open the Worker in Cloudflare > Settings > Variables
+and Secrets > add a text variable (or the equivalent Variables section).
+Name: ALLOWED_ORIGIN
+Value: your website origin only, for example https://yourname.github.io
+Do not include the repository path. Save/deploy the change.
+For a custom website domain use its exact HTTPS origin instead.
+The app currently accepts a workers.dev address for the email server.
+Your visitors also enter that address in Email setup on their own browser.
+The address is not a secret; do not publish anyone's inbox password or token.
+
+FILES INCLUDED
+index.html          Website page
+styles.css          Responsive theme
+app.js              Inbox, domain selection, setup, message reading, OTP copying
+setup.html          Click-by-click guide with Copy complete Worker code button
+START-HERE.txt      These instructions
+README.md           Short repository guide
+backend/worker.js   Email server to deploy on Cloudflare Workers
+backend/wrangler.jsonc  Worker deployment settings
+backend/package.json   Module/deployment configuration
+
+WHAT IS FREE / IMPORTANT LIMITS
+- GitHub Pages: use a public repository on the free plan.
+- Cloudflare Workers Free has request/CPU limits (currently 100,000 requests/day).
+- The email providers have their own availability and rate limits.
+- Temporary addresses are not accepted by every website. FineShare may reject
+  them. Different domains do not guarantee OTP acceptance.
+- Up to 10 saved inboxes in each browser. Delete/forget old ones to create more.
+- Mail.tm Delete inbox removes the provider inbox. DropMail Forget inbox only
+  removes your saved details; mail remains until DropMail's session expires.
+- Individual message deletion is unavailable for DropMail.
+- Inbox credentials, optional DropMail token and your Worker address are kept
+  in browser storage on this origin. Other sites on the same GitHub origin
+  share that browser-storage security boundary. Use only repositories you trust.
+- A different device/browser/website URL will not inherit saved inbox details.
+- Clearing browser data can lose your saved inboxes and setup.
+- Your Worker passes credentials/messages to the provider but this code does
+  not save them in a server database. The provider stores incoming emails.
+- Do not use temporary addresses for important accounts or permanent recovery.
+- Keep the visible provider attribution. No payment is built into this app.
+
+TROUBLESHOOTING
+Website 404: ensure index.html is at the main branch root; check Settings > Pages.
+No styling: upload styles.css and app.js beside index.html, using exact filenames.
+Cloudflare build failure: root directory must be backend; deploy command must
+be npx wrangler deploy. Choose Workers, not a Pages static-only project.
+Save connection fails: deploy the included NEW backend/worker.js, not the old
+all-in-one Worker. Use its workers.dev address and check ALLOWED_ORIGIN above.
+Do not open index.html from your computer for live email; use the GitHub URL.
+Temporary provider errors: wait and retry. Do not click Refresh repeatedly.
+No OTP: run the normal-email test in section E; the sender may reject temp mail.
+DropMail expired: create a new inbox. Expired messages cannot be recovered.
+
+VALIDATION
+Checked frontend/Worker syntax, existing inbox operations and DropMail flows,
+GitHub cross-origin preflight/headers, allowed-origin rejection, Worker-address
+validation and relative asset paths. The first-time setup screen and invalid
+address feedback were checked in a browser preview. Live provider domain
+access was checked. No new GitHub/Cloudflare deployment in your accounts was
+performed, and actual incoming OTP delivery has not been tested.
+
+OFFICIAL REFERENCES
+https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site
+https://developers.cloudflare.com/workers/get-started/dashboard/
+https://developers.cloudflare.com/workers/platform/pricing/
+https://docs.mail.tm/
+https://dropmail.me/api/
